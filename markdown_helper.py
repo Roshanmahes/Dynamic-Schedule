@@ -27,7 +27,7 @@ def markdown_popup():
                                 children=dedent(
                                 r"""
                                 ##### What am I looking at?
-                                
+                                TODO
                                 This app finds an optimal schedule for $n$ clients, that is, a sequence of arrival epochs $t_1,\dots,t_n$ 
                                 that minimizes the objective function
 

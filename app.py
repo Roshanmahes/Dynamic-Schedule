@@ -14,21 +14,26 @@ import plotly.io as pio
 pio.templates.default = 'plotly_white'
 
 
-# initial table & figure
+# initial table
 n = 20
 m = 0
 Delta = 0.01
 
-minima = [[None] * (n-1) for k in range(n-1)]
+minima = [[None] * (n-1) for k in range(n)]
 
 for i in range(n-1):
     for k in range(i+1):
         minima[i][k] = f'{round(12.78, 2):.2f}'
+
+for i in range(n-1):
+    minima[n-1][i] = i+1
         
 # minima
-df = pd.DataFrame(minima, index=range(1,20), columns=range(1,20)).fillna('')
+df = pd.DataFrame(minima, index=list(range(1,n)) + ['i / k'], columns=range(1,n)).fillna('') # columns=range(1,n)
 df.index.name = 'i'
 df.reset_index(level=0, inplace=True)
+
+# print(df)
 
 
 # df = pd.DataFrame({r'Client (\(i\))': [''],
@@ -36,20 +41,18 @@ df.reset_index(level=0, inplace=True)
 #                    r'Arrival time (\(t_i\))': ['']})
 df = df.to_dict('records')
 
-no_fig = {
-    'layout': {
-        'xaxis': {'visible': False},
-        'yaxis': {'visible': False},
-        'paper_bgcolor': 'rgba(0,0,0,0)',
-        'plot_bgcolor': 'rgba(0,0,0,0)'
-    }
-}
+# print(df)
 
-columns = [{'name': [f'Appointment Schedule', k], 'id': k} for k in df[0].keys()]
+# print(df[0].keys())
+
+columns = [{'name': [r'Optimal Interarrival Times \(\tau_{i}(k)\)'], 'id': k} for k in df[0].keys()] #[{'name': [f'Appointment Schedule', k], 'id': k} for k in df[0].keys()]
+#  'i' if k == 'i' else None
+
+print(columns)
 
 # main app
-# app = dash.Dash(__name__, external_scripts=['https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML'])
-app = dash.Dash(__name__, external_scripts=['https://cdn.jsdelivr.net/npm/mathjax@2.7.8/MathJax.js?config=TeX-MML-AM_CHTML'])
+app = dash.Dash(__name__, external_scripts=['https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML'])
+# app = dash.Dash(__name__, external_scripts=['https://cdn.jsdelivr.net/npm/mathjax@2.7.8/MathJax.js?config=TeX-MML-AM_CHTML'])
 app.title = 'Dynamic Schedule'
 server = app.server
 
@@ -124,10 +127,6 @@ def app_layout():
                                 style_header={'textAlign': 'center', 'backgroundColor': '#f9f9f9', 'fontWeight': 'bold'},
                                 style_cell={'textAlign': 'center'},
                                 style_data_conditional=[
-                                    # {
-                                    #     'if': {'row_index': 'odd'},
-                                    #     'backgroundColor': '#f9f9f9'
-                                    # },
                                     {
                                         'if': {'state': 'selected'},
                                         'backgroundColor': '#e0f1f0',
@@ -143,15 +142,50 @@ def app_layout():
                                         'background-color': '#FAFAFA',
                                         'border': '1px solid #d5d5d5',
                                     },
+                                    {
+                                        'if': {'row_index': n-1},
+                                        'background-color': '#FAFAFA',
+                                        'fontWeight': 'bold',
+                                    },
+                                    {
+                                        'if': {'row_index': n-1, 'state': 'selected'},
+                                        'background-color': '#FAFAFA',
+                                        'border': '1px solid #d5d5d5',
+                                    },
+                                ] + 
+                                [
+                                    {
+                                        'if': {'row_index': i, 'column_id': i+1},
+                                        'border': '1px solid #d5d5d5',
+                                    } for i in range(n)
+                                ] +
+                                [
+                                    {
+                                        'if': {'row_index': i, 'column_id': i+j},
+                                        'border': '1px solid #ffffff',
+                                    } for i in range(n) for j in range(2,n)
+                                ] +
+                                [
+                                    {
+                                        'if': {'row_index': i, 'column_id': i+j, 'state': 'selected'},
+                                        'background-color': '#ffffff',
+                                        'border': 'transparent',
+                                    } for i in range(n) for j in range(2,n)
+                                ] +
+                                [
+                                    {
+                                        'if': {'row_index': i, 'column_id': i+1},
+                                        'border': '1px solid #d5d5d5',
+                                    } for i in range(n)
                                 ],
                             ),
                         ),
-                        html.Div([
-                            dcc.Graph(
-                                id='graph_df',
-                                figure = no_fig,
-                                config={'displayModeBar': False},
-                            )], className='graphic'),
+                        # html.Div([
+                        #     dcc.Graph(
+                        #         id='graph_df',
+                        #         figure = no_fig,
+                        #         config={'displayModeBar': False},
+                        #     )], className='graphic'),
                     ],
                 ),
             ],
