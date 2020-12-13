@@ -53,7 +53,7 @@ def app_layout():
                                 html.Td(r'\([0,\infty)\)'),
                                 html.Td('mean')])] +
                             [html.Tr([html.Td(r'\(\mathbb{S}(B)\)'),
-                                html.Div(dcc.Input(id='SCV', min=0.2, max=2, value=0.5, type='number')),
+                                html.Div(dcc.Input(id='SCV', min=0.2, max=2, value=0.6, type='number')),
                                 html.Td(r'\([0.2,2]\)'),
                                 html.Td('SCV')])] +
                             [html.Tr([html.Td(r'\(\omega\)'),
@@ -61,8 +61,8 @@ def app_layout():
                                 html.Td(r'\((0,1)\)'),
                                 html.Td('importance idle : waiting time')])] +
                             [html.Tr([html.Td(r'\(n\)'),
-                                dcc.Input(id='n', min=1, max=19, step=1, value=15, type='number'),
-                                html.Td(r'\([1,19]\)'),
+                                dcc.Input(id='n', min=1, max=20, step=1, value=15, type='number'),
+                                html.Td(r'\([1,20]\)'),
                                 html.Td('#clients to be scheduled')])] +
                             [html.Tr([html.Td(r'\(k\)'),
                                 dcc.Input(id='k', min=0, max=8, step=1, value=0, type='number'),
@@ -80,6 +80,31 @@ def app_layout():
                     id='right-side-column',
                     className='dynamic schedule',
                     children=[
+                        html.Div(
+                            children=[
+                                html.Div(children=[r"\(u\) (slider)"]),
+                                html.Div(
+                                    dcc.Slider(
+                                        id='u_slide',
+                                        min=0,
+                                        max=2.5,
+                                        step=0.01,
+                                        marks={
+                                            0: '0',
+                                            0.5: '0.5',
+                                            1: '1',
+                                            1.5: '1.5',
+                                            2: '2',
+                                            2.5: '2.5',
+                                            # i: f'{i}'
+                                            # for i in [0.5*i for i in range(6)]
+                                        },
+                                        value=0,
+                                        updatemode='drag',
+                                    ),
+                                ),
+                            ],
+                        ),
                         html.Div(
                             dt.DataTable(
                                 id='schedule_df',
@@ -114,6 +139,21 @@ def update_click_output(button_click, close_click):
         return {'display': 'block'}
     else:
         return {'display': 'none'}
+
+# slider
+@app.callback(
+    [Output('u', 'value')],
+    [Input('u_slide', 'value'),],
+)
+def update_shocks(value):
+    return [value]
+
+@app.callback(
+    [Output('u_slide', 'value')],
+    [Input('u', 'value'),],
+)
+def update_shocks2(value):
+    return [value]
 
 # schedule
 @app.callback(

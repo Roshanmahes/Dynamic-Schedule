@@ -64,12 +64,6 @@ def style_table(n):
         } for i in range(n) for j in range(2,n)
     ] + [
         {
-            'if': {'row_index': i, 'column_id': i+j, 'state': 'selected'},
-            'background-color': '#ffffff',
-            'border': 'transparent',
-        } for i in range(n) for j in range(2,n)
-    ] + [
-        {
             'if': {'row_index': i, 'column_id': i+1},
             'border': '1px solid #d5d5d5',
         } for i in range(n)

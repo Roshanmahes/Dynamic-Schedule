@@ -171,3 +171,21 @@ p {
   margin-bottom: 5%;
   height: 90%;
 }
+
+/* #u_slide{
+  width: 100%
+} */
+
+.rc-slider-track {
+  background-color: #8ed1ca;
+}
+
+.rc-slider-dot-active,
+.rc-slider-dot,
+.rc-slider-handle {
+  border-color: #009688;
+}
+
+.rc-slider-handle:hover {
+  border-color: #8ed1ca;
+}
