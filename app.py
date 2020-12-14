@@ -65,7 +65,7 @@ def app_layout():
                                 html.Td(r'\([1,20]\)'),
                                 html.Td('total number of clients')])] +
                             [html.Tr([html.Td(r'\(i\)'),
-                                dcc.Input(id='i', min=1, max=19, step=1, value=1, type='number'),
+                                dcc.Input(id='i', min=1, max=19, step=1, value=5, type='number'),
                                 html.Td(r'\([1,n-1]\)'),
                                 html.Td('client that just entered')])] +
                             [html.Tr([html.Td(r'\(k\)'),
@@ -150,23 +150,23 @@ def update_click_output(button_click, close_click):
     [Input('u_slide', 'value'), Input('mean', 'value')],
 )
 def update_shocks(value, mean):
-    return [value * mean]
+    return [round(value * mean, 10)]
 
 @app.callback(
     [Output('u_slide', 'value')],
     [Input('u', 'value'), Input('mean', 'value')],
 )
 def update_shocks2(value, mean):
-    return [value / mean]
+    return [round(value / mean, 2)]
 
 # schedule
 @app.callback(
     [Output('schedule_df', 'columns'), Output('schedule_df', 'style_data_conditional'), Output('schedule_df', 'data')],
     [Input('submit-button', 'n_clicks')],
-    [State('mean', 'value'), State('SCV', 'value'), State('omega', 'value'),
-     State('n', 'value'), State('u_slide', 'value')], # State('k', 'value'), 
+    [State('mean', 'value'), State('SCV', 'value'), State('omega', 'value'), State('n', 'value'), 
+     State('i', 'value'), State('k', 'value'),  State('u_slide', 'value')],
 )
-def updateTable(n_clicks, mean, SCV, omega, n, u):
+def updateTable(n_clicks, mean, SCV, omega, n, i, k, u):
 
     df = dynamic_schedule(mean, SCV, omega, n, u)
     
@@ -179,7 +179,7 @@ def updateTable(n_clicks, mean, SCV, omega, n, u):
     df.reset_index(level=0, inplace=True)
 
 
-    style_data = style_table(n)
+    style_data = style_table(n, i, k)
     columns = [{'name': [r'Optimal interarrival times \(\tau_{i}(k,u)\)'], 'id': k} for k in df.keys()]
 
     return columns, style_data, df.to_dict('records')
