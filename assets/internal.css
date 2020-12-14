@@ -21,7 +21,8 @@ body {
 
 #left-side-column {
   height: calc(100vh);
-  width: 33%;
+  overflow-y: auto;
+  width: 35%;
   color: #000000;
   background-color: #e0f1f0;
   align-items: left;
@@ -30,7 +31,7 @@ body {
 
 #right-side-column {
   height: calc(100vh - 5px);
-  overflow-y: scroll;
+  overflow-y: auto;
   margin-left: 1%;
   padding: 1rem 2rem;
 }
@@ -65,8 +66,8 @@ p {
 }
 
 .markdown-container {
-  width: 60vw;
-  margin: 10% auto;
+  width: 75vw;
+  margin: 7.5% auto;
   padding: 10px 15px;
   background-color: #f9f9f9;
   border-radius: 10px;
@@ -158,6 +159,13 @@ p {
   height: 90%;
 }
 
+#i{
+  width: 100%;
+  margin-top: 5%;
+  margin-bottom: 5%;
+  height: 90%;
+}
+
 #k{
   width: 100%;
   margin-top: 5%;
@@ -186,6 +194,7 @@ p {
   border-color: #009688;
 }
 
+.rc.slider-handle-active:active,
 .rc-slider-handle:hover {
   border-color: #8ed1ca;
 }

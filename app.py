@@ -57,21 +57,25 @@ def app_layout():
                                 html.Td(r'\([0.2,2]\)'),
                                 html.Td('SCV')])] +
                             [html.Tr([html.Td(r'\(\omega\)'),
-                                dcc.Input(id='omega', min=0.1, max=0.9, value=0.5, type='number'),
+                                dcc.Input(id='omega', min=0.1, max=0.9, step=0.1, value=0.5, type='number'),
                                 html.Td(r'\((0,1)\)'),
-                                html.Td('importance idle : waiting time')])] +
+                                html.Td('idle : waiting time')])] +
                             [html.Tr([html.Td(r'\(n\)'),
                                 dcc.Input(id='n', min=1, max=20, step=1, value=15, type='number'),
                                 html.Td(r'\([1,20]\)'),
-                                html.Td('#clients to be scheduled')])] +
+                                html.Td('total number of clients')])] +
+                            [html.Tr([html.Td(r'\(i\)'),
+                                dcc.Input(id='i', min=1, max=19, step=1, value=1, type='number'),
+                                html.Td(r'\([1,n-1]\)'),
+                                html.Td('client that just entered')])] +
                             [html.Tr([html.Td(r'\(k\)'),
-                                dcc.Input(id='k', min=0, max=8, step=1, value=0, type='number'),
-                                html.Td(r'\([0,8]\)'),
-                                html.Td('#clients in system')])] + 
+                                dcc.Input(id='k', min=0, max=19, step=1, value=3, type='number'),
+                                html.Td(r'\([1,i]\)'),
+                                html.Td(r'#clients in system at time \(t_i\)')])] + 
                             [html.Tr([html.Td(r'\(u\)'),
-                                dcc.Input(id='u', min=0, max=50, step=0.01, value=0, type='number'),
-                                html.Td(r'\([0,50]\)'),
-                                html.Td('service time client in service (so far)')])], style={'width': '100%'}
+                                dcc.Input(id='u', min=0, value=0.6, type='number'),
+                                html.Td(r'\([0,2.5]\)'),
+                                html.Td(r'service time at time \(t_i\)')])], style={'width': '100%'}
                         ),
                         html.Button(id='submit-button', n_clicks=0, children='Compute Appointment Schedule'),
                     ]
@@ -81,31 +85,6 @@ def app_layout():
                     className='dynamic schedule',
                     children=[
                         html.Div(
-                            children=[
-                                html.Div(children=[r"\(u\) (slider)"]),
-                                html.Div(
-                                    dcc.Slider(
-                                        id='u_slide',
-                                        min=0,
-                                        max=2.5,
-                                        step=0.01,
-                                        marks={
-                                            0: '0',
-                                            0.5: '0.5',
-                                            1: '1',
-                                            1.5: '1.5',
-                                            2: '2',
-                                            2.5: '2.5',
-                                            # i: f'{i}'
-                                            # for i in [0.5*i for i in range(6)]
-                                        },
-                                        value=0,
-                                        updatemode='drag',
-                                    ),
-                                ),
-                            ],
-                        ),
-                        html.Div(
                             dt.DataTable(
                                 id='schedule_df',
                                 data=df,
@@ -113,6 +92,31 @@ def app_layout():
                                 style_header={'textAlign': 'center', 'backgroundColor': '#f9f9f9', 'fontWeight': 'bold'},
                                 style_cell={'textAlign': 'center'},
                             ),
+                        ),
+                        html.Div(
+                            children=[
+                                html.Div(children=[r"\(u\) slider \n"]),
+                                html.Div(
+                                    dcc.Slider(
+                                        id='u_slide',
+                                        min=0,
+                                        max=2.5,
+                                        step=0.01,
+                                        marks={
+                                            0: r'\(0\)',
+                                            0.5: r'\(0.5 \mathbb{E}B\)',
+                                            1: r'\(\mathbb{E}B\)',
+                                            1.5: r'\(1.5 \mathbb{E}B\)',
+                                            2: r'\(2 \mathbb{E}B\)',
+                                            2.5: r'\(2.5 \mathbb{E}B\)',
+                                            # i: f'{i}'
+                                            # for i in [0.5*i for i in range(6)]
+                                        },
+                                        value=0.6,
+                                        updatemode='drag',
+                                    ),
+                                ),
+                            ],
                         ),
                     ],
                 ),
@@ -143,24 +147,24 @@ def update_click_output(button_click, close_click):
 # slider
 @app.callback(
     [Output('u', 'value')],
-    [Input('u_slide', 'value'),],
+    [Input('u_slide', 'value'), Input('mean', 'value')],
 )
-def update_shocks(value):
-    return [value]
+def update_shocks(value, mean):
+    return [value * mean]
 
 @app.callback(
     [Output('u_slide', 'value')],
-    [Input('u', 'value'),],
+    [Input('u', 'value'), Input('mean', 'value')],
 )
-def update_shocks2(value):
-    return [value]
+def update_shocks2(value, mean):
+    return [value / mean]
 
 # schedule
 @app.callback(
     [Output('schedule_df', 'columns'), Output('schedule_df', 'style_data_conditional'), Output('schedule_df', 'data')],
     [Input('submit-button', 'n_clicks')],
     [State('mean', 'value'), State('SCV', 'value'), State('omega', 'value'),
-     State('n', 'value'), State('u', 'value')], # State('k', 'value'), 
+     State('n', 'value'), State('u_slide', 'value')], # State('k', 'value'), 
 )
 def updateTable(n_clicks, mean, SCV, omega, n, u):
 
