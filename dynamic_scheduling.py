@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
 
-def dynamic_schedule(mean, SCV, omega, n, u, prefix='tau'):
+def dynamic_schedule(mean, SCV, omega, n, i, k, u):
     """
     Computes the table of optimal interarrival times tau_{i}(k,u).
     """
@@ -10,22 +10,37 @@ def dynamic_schedule(mean, SCV, omega, n, u, prefix='tau'):
     Delta = 0.01
     m = int(u / Delta)
 
+    # retrieve files
     file_name = f'-SCV-{round(SCV,2)}-omega-{round(omega,1)}-n-20-m-250'
-    file_name = 'output/' + prefix + file_name.replace('.', '_') + '.xlsx'
-    work_sheets = load_workbook(file_name).worksheets
+    file_name_tau = 'output/tau' + file_name.replace('.', '_') + '.xlsx'
+    file_name_xi = 'output/xi' + file_name.replace('.', '_') + '.xlsx'
+    work_sheets_tau = load_workbook(file_name_tau).worksheets
+    work_sheets_xi = load_workbook(file_name_xi).worksheets
 
+    # retrieve cost
+    df_xi_sheet = pd.DataFrame(work_sheets_xi[i-n-1].values)
+    cost = round(df_xi_sheet[k-1][m] * mean,2)
+
+    # create table
     df_list = []
 
-    for i in range(n):
+    for i in range(1,n):
 
-        df_sheet = pd.DataFrame(work_sheets[i-n].values)
-        df_row = df_sheet.iloc[m,:i+1] * mean
+        df_sheet = pd.DataFrame(work_sheets_tau[i-n].values)
+        df_row = df_sheet.iloc[m,:i] * mean
         df_list += [[f'{df_row[i]:.2f}' for i in range(len(df_row))]]
 
-    df = pd.DataFrame(df_list, columns=range(1,n+1)).fillna('')
-    df.index = range(1,n+1)
+    df = pd.DataFrame(df_list, columns=range(1,n)).fillna('')
+    df.index = range(1,n)
 
-    return df
+    df.loc[n,:] = range(1,n)
+    df.index = list(range(1,n)) + ['i / k']
+
+    df.index.name = 'i'
+    df.reset_index(level=0, inplace=True)
+
+    return df, cost
+
 
 def style_table(n, i, k):
     """

@@ -12,10 +12,9 @@ from dynamic_scheduling import dynamic_schedule, style_table
 # initial table
 df = pd.DataFrame().to_dict('records')
 
-
 # main app
-app = dash.Dash(__name__, external_scripts=['https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML'])
-# app = dash.Dash(__name__, external_scripts=['https://cdn.jsdelivr.net/npm/mathjax@2.7.8/MathJax.js?config=TeX-MML-AM_CHTML'])
+# app = dash.Dash(__name__, external_scripts=['https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML'])
+app = dash.Dash(__name__, external_scripts=['https://cdn.jsdelivr.net/npm/mathjax@2.7.8/MathJax.js?config=TeX-MML-AM_CHTML'])
 app.title = 'Dynamic Schedule'
 server = app.server
 
@@ -53,7 +52,7 @@ def app_layout():
                                 html.Td(r'\([0,\infty)\)'),
                                 html.Td('mean')])] +
                             [html.Tr([html.Td(r'\(\mathbb{S}(B)\)'),
-                                html.Div(dcc.Input(id='SCV', min=0.2, max=2, value=0.6, type='number')),
+                                html.Div(dcc.Input(id='SCV', min=0.2, max=2, value=0.8, type='number')),
                                 html.Td(r'\([0.2,2]\)'),
                                 html.Td('SCV')])] +
                             [html.Tr([html.Td(r'\(\omega\)'),
@@ -69,12 +68,12 @@ def app_layout():
                                 html.Td(r'\([1,n-1]\)'),
                                 html.Td('client that just entered')])] +
                             [html.Tr([html.Td(r'\(k\)'),
-                                dcc.Input(id='k', min=0, max=19, step=1, value=3, type='number'),
+                                dcc.Input(id='k', min=1, max=19, step=1, value=3, type='number'),
                                 html.Td(r'\([1,i]\)'),
                                 html.Td(r'#clients in system at time \(t_i\)')])] + 
                             [html.Tr([html.Td(r'\(u\)'),
                                 dcc.Input(id='u', min=0, value=0.6, type='number'),
-                                html.Td(r'\([0,2.5]\)'),
+                                html.Td(r'\([0,2.5\mathbb{E}B]\)'),
                                 html.Td(r'service time at time \(t_i\)')])], style={'width': '100%'}
                         ),
                         html.Button(id='submit-button', n_clicks=0, children='Compute Appointment Schedule'),
@@ -95,13 +94,14 @@ def app_layout():
                         ),
                         html.Div(
                             children=[
-                                html.Div(children=[r"\(u\) slider \n"]),
+                                html.Br(),
+                                html.P(children='', id='cost_text'),
+                                html.Br(),
+                                html.P('The slider below can also be used to study the effect of the elapsed service time ' + \
+                                        r'\(u\) of the client that is currently (i.e., at time \(t_i\)) in service.'),
                                 html.Div(
                                     dcc.Slider(
-                                        id='u_slide',
-                                        min=0,
-                                        max=2.5,
-                                        step=0.01,
+                                        id='u_slide', min=0, max=2.5, step=0.01, value=0.6,
                                         marks={
                                             0: r'\(0\)',
                                             0.5: r'\(0.5 \mathbb{E}B\)',
@@ -109,13 +109,12 @@ def app_layout():
                                             1.5: r'\(1.5 \mathbb{E}B\)',
                                             2: r'\(2 \mathbb{E}B\)',
                                             2.5: r'\(2.5 \mathbb{E}B\)',
-                                            # i: f'{i}'
-                                            # for i in [0.5*i for i in range(6)]
                                         },
-                                        value=0.6,
                                         updatemode='drag',
                                     ),
                                 ),
+                                html.Br(),
+                                html.P('Click on the button to the left to recompute the schedule.')
                             ],
                         ),
                     ],
@@ -135,7 +134,7 @@ def app_layout():
 def update_click_output(button_click, close_click):
 
     ctx = dash.callback_context
-    prop_id = ""
+    prop_id = ''
     if ctx.triggered:
         prop_id = ctx.triggered[0]['prop_id'].split(".")[0]
 
@@ -161,28 +160,26 @@ def update_shocks2(value, mean):
 
 # schedule
 @app.callback(
-    [Output('schedule_df', 'columns'), Output('schedule_df', 'style_data_conditional'), Output('schedule_df', 'data')],
+    [Output('schedule_df', 'columns'), Output('schedule_df', 'style_data_conditional'),
+     Output('schedule_df', 'data'), Output('cost_text', 'children')],
     [Input('submit-button', 'n_clicks')],
     [State('mean', 'value'), State('SCV', 'value'), State('omega', 'value'), State('n', 'value'), 
      State('i', 'value'), State('k', 'value'),  State('u_slide', 'value')],
 )
-def updateTable(n_clicks, mean, SCV, omega, n, i, k, u):
+def update_table(n_clicks, mean, SCV, omega, n, i, k, u):
 
-    df = dynamic_schedule(mean, SCV, omega, n, u)
+    if i >= n or k > i or u > 2.5: # incorrect parameters
+        df = pd.DataFrame()
+        cost_text = 'The parameters are incorrect. Please check the ranges of the parameters again.'
+    else:
+        df, cost = dynamic_schedule(mean, SCV, omega, n, i, k, u)
+        cost_text = r'The optimal arrival time is \(\tau_{i}(k,u) =\) ' + rf'\({df.loc[i-1,k]}\). '
+        cost_text += r'The corresponding (expected) cost is \(C^\star_{i}(k,u) =\) ' + rf'\({cost}\).'
     
-    df = pd.DataFrame(df, columns=range(1,n)).fillna('') # columns=range(1,n)
-    df.loc[n,:] = range(1,n)
-    df.index = list(range(1,n)) + ['i / k']
-
-
-    df.index.name = 'i'
-    df.reset_index(level=0, inplace=True)
-
-
     style_data = style_table(n, i, k)
     columns = [{'name': [r'Optimal interarrival times \(\tau_{i}(k,u)\)'], 'id': k} for k in df.keys()]
 
-    return columns, style_data, df.to_dict('records')
+    return columns, style_data, df.to_dict('records'), cost_text
 
 
 app.layout = app_layout
