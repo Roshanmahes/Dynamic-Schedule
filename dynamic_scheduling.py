@@ -1,6 +1,12 @@
 import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
+import urllib
+from io import BytesIO
+
+def load_workbook_from_url(url):
+    file = urllib.request.urlopen(url).read()
+    return load_workbook(filename=BytesIO(file))
 
 def dynamic_schedule(mean, SCV, omega, n, i, k, u):
     """
@@ -11,11 +17,13 @@ def dynamic_schedule(mean, SCV, omega, n, i, k, u):
     m = int(u / Delta)
 
     # retrieve files
+    url = 'https://github.com/Roshanmahes/Dynamic-Schedule/blob/main/output/'
     file_name = f'-SCV-{round(SCV,2)}-omega-{round(omega,1)}-n-20-m-250'
-    file_name_tau = 'output/tau' + file_name.replace('.', '_') + '.xlsx'
-    file_name_xi = 'output/xi' + file_name.replace('.', '_') + '.xlsx'
-    work_sheets_tau = load_workbook(file_name_tau).worksheets
-    work_sheets_xi = load_workbook(file_name_xi).worksheets
+    file_name_tau = url + 'tau' + file_name.replace('.', '_') + '.xlsx?raw=true'
+    file_name_xi = url + 'xi' + file_name.replace('.', '_') + '.xlsx?raw=true'
+
+    work_sheets_tau = load_workbook_from_url(file_name_tau).worksheets
+    work_sheets_xi = load_workbook_from_url(file_name_xi).worksheets
 
     # retrieve cost
     df_xi_sheet = pd.DataFrame(work_sheets_xi[i-n-1].values)
