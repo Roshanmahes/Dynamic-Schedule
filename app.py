@@ -52,7 +52,7 @@ def app_layout():
                                 html.Td(r'\([0,\infty)\)'),
                                 html.Td('mean')])] +
                             [html.Tr([html.Td(r'\(\mathbb{S}(B)\)'),
-                                html.Div(dcc.Input(id='SCV', min=0.2, max=2, value=0.8, type='number')),
+                                html.Div(dcc.Input(id='SCV', min=0.2, max=2, step=0.01, value=0.8, type='number')),
                                 html.Td(r'\([0.2,2]\)'),
                                 html.Td('SCV')])] +
                             [html.Tr([html.Td(r'\(\omega\)'),
