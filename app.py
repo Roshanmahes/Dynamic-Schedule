@@ -19,7 +19,7 @@ app.title = 'Dynamic Schedule'
 server = app.server
 
 def app_layout():
-    
+
     app_layout = html.Div(id='main',children=[
         dcc.Interval(id='interval-updating-graphs', interval=1000, n_intervals=0),
         html.Div(id='top-bar'),
@@ -70,7 +70,7 @@ def app_layout():
                             [html.Tr([html.Td(r'\(k\)'),
                                 dcc.Input(id='k', min=1, max=19, step=1, value=3, type='number'),
                                 html.Td(r'\([1,i]\)'),
-                                html.Td(r'#clients in system at time \(t_i\)')])] + 
+                                html.Td(r'#clients in system at time \(t_i\)')])] +
                             [html.Tr([html.Td(r'\(u\)'),
                                 dcc.Input(id='u', min=0, value=0.6, type='number'),
                                 html.Td(r'\([0,2.5\mathbb{E}B]\)'),
@@ -163,7 +163,7 @@ def update_shocks2(value, mean):
     [Output('schedule_df', 'columns'), Output('schedule_df', 'style_data_conditional'),
      Output('schedule_df', 'data'), Output('cost_text', 'children')],
     [Input('submit-button', 'n_clicks')],
-    [State('mean', 'value'), State('SCV', 'value'), State('omega', 'value'), State('n', 'value'), 
+    [State('mean', 'value'), State('SCV', 'value'), State('omega', 'value'), State('n', 'value'),
      State('i', 'value'), State('k', 'value'),  State('u_slide', 'value')],
 )
 def update_table(n_clicks, mean, SCV, omega, n, i, k, u):
@@ -173,9 +173,9 @@ def update_table(n_clicks, mean, SCV, omega, n, i, k, u):
         cost_text = 'The parameters are incorrect. Please check the ranges of the parameters again.'
     else:
         df, cost = dynamic_schedule(mean, SCV, omega, n, i, k, u)
-        cost_text = r'The optimal arrival time is \(\tau_{i}(k,u) =\) ' + rf'\({df.loc[i-1,k]}\). '
-        cost_text += r'The corresponding (expected) cost is \(C^\star_{i}(k,u) =\) ' + rf'\({cost}\).'
-    
+        cost_text = rf'The optimal arrival time is \(\tau_i(k,u) = {df.loc[i-1,k]}\). '
+        cost_text += rf'The corresponding (expected) cost is \(C^\star_i(k,u) = {cost}\).'
+
     style_data = style_table(n, i, k)
     columns = [{'name': [r'Optimal interarrival times \(\tau_{i}(k,u)\)'], 'id': k} for k in df.keys()]
 
