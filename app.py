@@ -173,7 +173,7 @@ def update_table(n_clicks, mean, SCV, omega, n, i, k, u):
         cost_text = 'The parameters are incorrect. Please check the ranges of the parameters again.'
     else:
         df, cost = dynamic_schedule(mean, SCV, omega, n, i, k, u)
-        cost_text = rf'The optimal arrival time is \(\tau_i(k,u) = {df.loc[i-1,k]}\). '
+        cost_text = rf'The optimal arrival time is \(\tau_i(k,u) = {df.iloc[i-1,k]}\). '
         cost_text += rf'The corresponding (expected) cost is \(C^\star_i(k,u) = {cost}\).'
 
     style_data = style_table(n, i, k)
