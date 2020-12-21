@@ -12,8 +12,8 @@ def dynamic_schedule(mean, SCV, omega, n, i, k, u):
     m = int(u / Delta)
 
     # retrieve files
-    url_tau = f'Dyn-Sched-Data/master/omega-{round(omega,1)}/tau-SCV-{round(SCV,2)}-omega-{round(omega,1)}-n-20-m-{m}'
-    url_xi = f'Dyn-Sched-Data/master/omega-{round(omega,1)}/xi-SCV-{round(SCV,2)}-omega-{round(omega,1)}-n-20-m-{m}'
+    url_tau = f'Dyn-Sched-Data/master/omega-{round(omega,1)}/tau-SCV-{round(float(SCV),2)}-omega-{round(omega,1)}-n-20-m-{m}'
+    url_xi = f'Dyn-Sched-Data/master/omega-{round(omega,1)}/xi-SCV-{round(float(SCV),2)}-omega-{round(omega,1)}-n-20-m-{m}'
     url_tau = 'https://raw.githubusercontent.com/Roshanmahes/' + url_tau.replace('.', '_') + '.csv'
     url_xi = 'https://raw.githubusercontent.com/Roshanmahes/' + url_xi.replace('.', '_') + '.csv'
 
